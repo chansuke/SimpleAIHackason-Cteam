@@ -90,6 +90,7 @@ dependencies = [
  "axum",
  "log",
  "openai_api_rust",
+ "serde",
  "serde_json",
  "tokio",
 ]
