@@ -25,6 +25,8 @@ const ResultCard = ({ cardObject }) => {
             .result-card {
                 display: flex;
                 flex-direction: row;
+                align-items: center;
+    justify-content: center;
             }
             `}</style>
         </>

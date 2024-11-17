@@ -105,12 +105,12 @@ export default function Home() {
             <Button type="submit">Submit</Button>
           </div>
         </form>
-        <ResultCard cardObject={ {
-    "time": "10:00",
-    "place": "千歳空港",
-    "activity_name": "飛行機から到着",
-    "type": "place"
-}}/>
+        <ResultCard cardObject={{
+          "time": "10:00",
+          "place": "千歳空港",
+          "activity_name": "飛行機から到着",
+          "type": "place"
+        }} />
       </main>
       <style>{`
         .submit-box {
