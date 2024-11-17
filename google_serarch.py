@@ -4,6 +4,7 @@
 import os
 import datetime
 import json
+import itertools
 
 from time import sleep
 from googleapiclient.discovery import build
@@ -55,7 +56,7 @@ class GoogleSearch:
         jsonstr = json.dumps(out, ensure_ascii=False)
         with open(os.path.join(save_response_dir, 'response_' + today + '.json'), mode='w') as response_file:
             response_file.write(jsonstr)
-        return response_links
+        return list(itertools.chain.from_iterable(response_links))
 
 # 使用例
 # google_search = GoogleSearch(api_key=GOOGLE_API_KEY)
