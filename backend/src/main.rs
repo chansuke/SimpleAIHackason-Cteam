@@ -1,4 +1,5 @@
 pub mod models;
+pub mod scraper;
 
 use axum::{http::StatusCode, routing::post, Json, Router};
 use chat::ChatApi;
@@ -10,6 +11,7 @@ use serde_json::Value;
 use tower_http::cors::CorsLayer;
 
 use models::{ChatInput, BASE_URL};
+use scraper::scraper;
 
 #[tokio::main]
 async fn main() {
@@ -23,6 +25,7 @@ async fn main() {
 
 async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<Value>) {
     let auth = Auth::from_env().unwrap();
+    println!("auth: {:?}", auth);
     let openai = OpenAI::new(auth, BASE_URL);
 
     let country = chat_input.country;
@@ -62,12 +65,18 @@ async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<Value>) {
 pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
     let system_role =
         "あなたは優秀な観光ガイドです。主要な観光地はもちろん穴場な観光地まで知っています。";
-    let example_input = format!("
+    let example_input = format!(
+        "
 次の前提を踏まえて、旅行のタイムラインを作成してください。
 
 クエリ: {}の{}ような場所の情報を教えてください
 前提: {}
-", city, query, country);
+",
+        city, query, country
+    );
+    let contents = scraper(query);
+    println!("contents: {:?}", contents);
+
     let example_output = r#"
 以下のようなJSON形式で出力してください:
 [
@@ -88,10 +97,10 @@ pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
 ]
 "#;
 
-    println!("prompt :{:?}", format!(
-        "{}\n\n{}",
-        example_input, example_output
-    ));
+    println!(
+        "prompt :{:?}",
+        format!("{}\n\n{}", example_input, example_output)
+    );
     vec![
         Message {
             role: Role::System,
@@ -99,28 +108,22 @@ pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
         },
         Message {
             role: Role::User,
-            content: format!(
-                "{}\n\n{}",
-                example_input, example_output
-            ),
-        }
+            content: format!("{}\n\n{}", example_input, example_output),
+        },
     ]
 }
 
 pub fn extract_json(input: &str) -> Option<Value> {
-    // 正規表現で `[` で始まり、 `]` で終わる部分をキャプチャ
     let re = Regex::new(r#"\[\s*(?P<json>[\s\S]*?)\s*\]"#).unwrap();
 
     println!("json input: {:?}", input);
     if let Some(captures) = re.captures(input) {
         println!("re: {:?}", captures);
 
-        // 名前付きキャプチャグループ "json" を取得
         if let Some(json_str) = captures.name("json") {
             println!("Extracted JSON: {}", json_str.as_str());
             let json_data = json_str.as_str().trim();
 
-            // キャプチャ部分を JSON としてパース
             let json: Value = serde_json::from_str(&format!("[{}]", json_data)).ok()?;
             return Some(json);
         }
