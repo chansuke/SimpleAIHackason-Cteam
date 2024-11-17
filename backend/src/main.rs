@@ -65,9 +65,9 @@ pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
     let example_input = format!("
 次の前提を踏まえて、旅行のタイムラインを作成してください。
 
-クエリ: {}の観光地の情報を教えてください
+クエリ: {}の{}ような場所の情報を教えてください
 前提: {}
-", city, country);
+", city, query, country);
     let example_output = r#"
 以下のようなJSON形式で出力してください:
 [
@@ -75,12 +75,14 @@ pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
   "time": "10:00",
   "place": "何とかサービスエリア",
   "activity_name": "ソフトクリームを食べる",
+  "description": "サービスエリアで有名なアイスを食べる",
   "type": "food"
 },
 {
   "time": "12:00",
   "place": "どこかのレストラン",
   "activity_name": "ソフトクリームを食べる",
+  "description": "サービスエリアで有名なアイスを食べる",
   "type": "food"
 },...
 ]

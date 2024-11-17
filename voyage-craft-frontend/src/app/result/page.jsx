@@ -46,7 +46,7 @@ export default function Result() {
                 if (!response.ok) {
                     throw new Error(`API Error: ${response.status}`);
                 }
-                console.log(await response.text())
+                setResultList(await response.json())
 
             } catch (err) {
                 setError(err.message); // エラーを状態に設定
