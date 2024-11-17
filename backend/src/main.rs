@@ -34,7 +34,7 @@ async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<Value>) {
     let chat_body = ChatBody {
         model: "gpt-4o".to_string(),
         messages,
-        max_tokens: Some(200),
+        max_tokens: Some(3000),
         temperature: Some(0_f32),
         top_p: Some(0_f32),
         n: Some(2),
@@ -52,6 +52,7 @@ async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<Value>) {
     let choice = response.unwrap().choices;
     let message = choice[0].message.as_ref().unwrap();
     let content = message.content.clone();
+    println!("test: {:?}", content);
     let extracted_json = extract_json(&content).unwrap();
     info!("Content: {:?}", extracted_json);
 
@@ -61,14 +62,15 @@ async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<Value>) {
 pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
     let system_role =
         "あなたは優秀な観光ガイドです。主要な観光地はもちろん穴場な観光地まで知っています。";
-    let example_input = r#"
+    let example_input = format!("
 次の前提を踏まえて、旅行のタイムラインを作成してください。
 
-クエリ: 札幌の観光地の情報を教えてください
-前提: 北海道
-"#;
+クエリ: {}の観光地の情報を教えてください
+前提: {}
+", city, country);
     let example_output = r#"
-以下の形式で出力してください:
+以下のようなJSON形式で出力してください:
+[
 {
   "time": "10:00",
   "place": "何とかサービスエリア",
@@ -80,9 +82,14 @@ pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
   "place": "どこかのレストラン",
   "activity_name": "ソフトクリームを食べる",
   "type": "food"
-}
+},...
+]
 "#;
 
+    println!("prompt :{:?}", format!(
+        "{}\n\n{}",
+        example_input, example_output
+    ));
     vec![
         Message {
             role: Role::System,
@@ -94,32 +101,26 @@ pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
                 "{}\n\n{}",
                 example_input, example_output
             ),
-        },
-        Message {
-            role: Role::User,
-            content: format!(
-                "私は観光客で、{}の{}を訪れています。{}についてこの国での情報を提供してくれますか？",
-                country, city, query
-            ),
-        },
+        }
     ]
 }
 
 pub fn extract_json(input: &str) -> Option<Value> {
-    let re = Regex::new(r#"```json\s*(?P<json>[\s\S]*?)\s*```"#).unwrap();
+    // 正規表現で `[` で始まり、 `]` で終わる部分をキャプチャ
+    let re = Regex::new(r#"\[\s*(?P<json>[\s\S]*?)\s*\]"#).unwrap();
 
+    println!("json input: {:?}", input);
     if let Some(captures) = re.captures(input) {
+        println!("re: {:?}", captures);
+
+        // 名前付きキャプチャグループ "json" を取得
         if let Some(json_str) = captures.name("json") {
             println!("Extracted JSON: {}", json_str.as_str());
             let json_data = json_str.as_str().trim();
-            if json_data.starts_with('{') && json_data.contains("},") {
-                let wrapped_json = format!("[{}]", json_data);
-                let json: Value = serde_json::from_str(&wrapped_json).ok()?;
-                return Some(json);
-            } else {
-                let json: Value = serde_json::from_str(json_data).ok()?;
-                return Some(json[0].clone());
-            }
+
+            // キャプチャ部分を JSON としてパース
+            let json: Value = serde_json::from_str(&format!("[{}]", json_data)).ok()?;
+            return Some(json);
         }
     }
     None
