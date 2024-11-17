@@ -23,6 +23,7 @@ async fn main() {
 
 async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<Value>) {
     let auth = Auth::from_env().unwrap();
+    info!("Auth: {:?}", auth);
     let openai = OpenAI::new(auth, BASE_URL);
 
     let country = chat_input.country;
@@ -34,7 +35,7 @@ async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<Value>) {
     let chat_body = ChatBody {
         model: "gpt-4o".to_string(),
         messages,
-        max_tokens: Some(200),
+        max_tokens: Some(1500),
         temperature: Some(0_f32),
         top_p: Some(0_f32),
         n: Some(2),
@@ -52,7 +53,9 @@ async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<Value>) {
     let choice = response.unwrap().choices;
     let message = choice[0].message.as_ref().unwrap();
     let content = message.content.clone();
+    println!("Content: {}", content);
     let extracted_json = extract_json(&content).unwrap();
+    println!("Extracted JSON: {}", extracted_json);
     info!("Content: {:?}", extracted_json);
 
     (StatusCode::OK, Json(extracted_json))
