@@ -6,6 +6,7 @@ use crate::models::FETCH_URL;
 #[tokio::main]
 pub async fn scraper(query: &str) -> String {
     let url = format!("{}{}", FETCH_URL, query);
+    println!("URL: {}", url);
     match fetch_url_content(&url).await {
         Ok(content) => {
             println!("取得した内容: {}", content);

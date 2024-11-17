@@ -25,6 +25,7 @@ async fn main() {
 
 async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<Value>) {
     let auth = Auth::from_env().unwrap();
+    println!("auth: {:?}", auth);
     let openai = OpenAI::new(auth, BASE_URL);
 
     let country = chat_input.country;

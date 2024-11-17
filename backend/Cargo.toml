@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 axum = "0.7.9"
 log = "0.4.22"
+mockito = "1.6.1"
 openai_api_rust = "0.1.9"
 regex = "1.11.1"
 reqwest = "0.12.9"
