@@ -66,6 +66,7 @@ export default function Result() {
             ))}
             <style>{`
                 .result-container {
+                    padding: 0.5rem;
                     display: flex;
                     flex-direction: column;
                     gap: 16px;
