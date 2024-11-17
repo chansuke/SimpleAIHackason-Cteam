@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import Select from "react-select"; // Auto-complete用ライブラリ
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/router';
+import { ResultCard } from "@/components/resultCard";
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -104,6 +105,12 @@ export default function Home() {
             <Button type="submit">Submit</Button>
           </div>
         </form>
+        <ResultCard cardObject={ {
+    "time": "10:00",
+    "place": "千歳空港",
+    "activity_name": "飛行機から到着",
+    "type": "place"
+}}/>
       </main>
       <style>{`
         .submit-box {
