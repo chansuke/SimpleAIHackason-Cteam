@@ -55,11 +55,48 @@ async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<String>) {
 }
 
 pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
-    vec![Message {
-        role: Role::User,
-        content: format!(
-            "I am a tourist visiting {}, {}. Can you provide information about {} in this country?",
-            city, country, query
-        ),
-    }]
+    let system_role =
+        "あなたは優秀な観光ガイドです。主要な観光地はもちろん穴場な観光地まで知っています。";
+    let example_input = r#"
+次の前提を踏まえて、旅行のタイムラインを作成してください。
+
+クエリ: 札幌の観光地の情報を教えてください
+前提: 北海道
+"#;
+    let example_output = r#"
+以下の形式で出力してください:
+{
+  "time": "10:00",
+  "place": "何とかサービスエリア",
+  "activity_name": "ソフトクリームを食べる",
+  "type": "food"
+},
+{
+  "time": "12:00",
+  "place": "どこかのレストラン",
+  "activity_name": "ソフトクリームを食べる",
+  "type": "food"
+}
+"#;
+
+    vec![
+        Message {
+            role: Role::System,
+            content: system_role.to_string(),
+        },
+        Message {
+            role: Role::User,
+            content: format!(
+                "{}\n\n{}",
+                example_input, example_output
+            ),
+        },
+        Message {
+            role: Role::User,
+            content: format!(
+                "私は観光客で、{}の{}を訪れています。{}についてこの国での情報を提供してくれますか？",
+                country, city, query
+            ),
+        },
+    ]
 }
