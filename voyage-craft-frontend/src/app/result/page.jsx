@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { useSearchParams } from 'next/navigation';
+import { ResultCard } from "@/components/resultCard";
 
 export default function Result() {
     const searchParams = useSearchParams();
@@ -61,18 +62,7 @@ export default function Result() {
             {error && <p className="error">Error: {error}</p>} {/* エラー表示 */}
 
             {!loading && !error && resultList.map((elm, index) => (
-                <Card key={index} className="result-element">
-                    <CardHeader>
-                        <CardTitle>{elm.title || "No Title"}</CardTitle>
-                        <CardDescription>{elm.description || "No Description"}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <p>{elm.content || "No Content"}</p>
-                    </CardContent>
-                    <CardFooter>
-                        <p>Additional Info: {elm.additionalInfo || "N/A"}</p>
-                    </CardFooter>
-                </Card>
+                <ResultCard cardObject={elm}/>
             ))}
             <style>{`
                 .result-container {

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import Select from "react-select"; // Auto-complete用ライブラリ
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/router';
+import { ResultCard } from "@/components/resultCard";
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -65,8 +66,8 @@ export default function Home() {
   };
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+    <div className="main font-[family-name:var(--font-geist-sans)]">
+      <main className="main-content">
         <form onSubmit={submitInput}>
           <div className="submit-box flex flex-col gap-4">
             {/* 国のAuto-Complete */}
@@ -93,9 +94,9 @@ export default function Home() {
                   placeholder="Type or select a city"
                   isClearable
                 />
+                <p>の</p>
               </>
             )}
-            <p>の</p>
             <Input
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Enter some text"
@@ -104,10 +105,26 @@ export default function Home() {
             <Button type="submit">Submit</Button>
           </div>
         </form>
+        {/* <ResultCard cardObject={{
+          "time": "10:00",
+          "place": "千歳空港",
+          "activity_name": "飛行機から到着",
+          "type": "place"
+        }} /> */}
       </main>
       <style>{`
         .submit-box {
           gap: 8px;
+        }
+        .main {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+        }
+        .main-content {
+          width: 80%;
         }
       `}</style>
     </div>
