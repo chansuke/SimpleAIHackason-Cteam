@@ -23,9 +23,6 @@ const cardObject = {
     "type": "place"
 }
 
-const openModal = () => { }
-
-
 const ResultCard = ({ cardObject }) => {
     return (
         <>
