@@ -61,7 +61,7 @@ export default function Home() {
       selectedCountry: selectCountry ? selectCountry.value : null,
       selectedCity: selectCity ? selectCity.value : null,
     });
-    window.location.href = `/result?country=${selectCountry}&city=${selectCity}&query=${query}`
+    window.location.href = `/result?country=${selectCountry.value}&city=${selectCity.value}&query=${query}`
   };
 
   return (
