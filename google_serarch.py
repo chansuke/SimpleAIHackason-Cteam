@@ -30,6 +30,7 @@ class GoogleSearch:
         page_limit = 10
         start_index = 1
         response = []
+        response_links = []
         for n_page in range(0, page_limit):
             try:
                 sleep(1)
@@ -40,6 +41,7 @@ class GoogleSearch:
                     num=10,
                     start=start_index
                 ).execute())
+                response_links.append([item['link'] for item in response[n_page].get("items")])
                 start_index = response[n_page].get("queries").get("nextPage")[0].get("startIndex")
             except Exception as e:
                 print(e)
@@ -53,7 +55,7 @@ class GoogleSearch:
         jsonstr = json.dumps(out, ensure_ascii=False)
         with open(os.path.join(save_response_dir, 'response_' + today + '.json'), mode='w') as response_file:
             response_file.write(jsonstr)
-        return response
+        return response_links
 
 # 使用例
 # google_search = GoogleSearch(api_key=GOOGLE_API_KEY)
