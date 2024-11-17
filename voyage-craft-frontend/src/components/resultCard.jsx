@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Card, CardHeader } from "./ui/card"
+import { Card, CardHeader, CardContent, CardFooter } from "./ui/card"
 
 const cardObject = {
     "time": "10:00",
@@ -16,17 +16,22 @@ const ResultCard = ({ cardObject }) => {
             <div className="result-card">
                 <div className="result-card__time">{cardObject.time}</div>
                 <Card>
-                    <div className="result-card__place">{cardObject.place}</div>
-                    <div className="result-card__activity-name">{cardObject.activity_name}</div>
-                    <div className="result-card__type">{cardObject.type}</div>
-                    </Card>
+                    <CardHeader>
+                        <div className="result-card__place">{cardObject.place}</div>
+                        <div className="result-card__activity-name">{cardObject.activity_name}</div>
+                    </CardHeader>
+                    <CardFooter>
+                        <div className="result-card__type">{cardObject.type}</div>
+                    </CardFooter>
+                </Card>
             </div>
             <style>{`
             .result-card {
                 display: flex;
                 flex-direction: row;
                 align-items: center;
-    justify-content: center;
+                justify-content: space-evenly;
+
             }
             `}</style>
         </>
