@@ -25,6 +25,11 @@ export default function Result() {
         (async () => {
             try {
                 setLoading(true); // ローディング開始
+                console.log({
+                    country,
+                    city,
+                    query
+                })
                 const response = await fetch("http://localhost:8000/chat", {
                     method: "POST",
                     headers: {
@@ -40,9 +45,8 @@ export default function Result() {
                 if (!response.ok) {
                     throw new Error(`API Error: ${response.status}`);
                 }
+                console.log(await response.text())
 
-                const apiResult = await response.json();
-                setResultList(apiResult.results || []); // 結果を状態に設定
             } catch (err) {
                 setError(err.message); // エラーを状態に設定
             } finally {
