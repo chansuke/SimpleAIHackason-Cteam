@@ -1,13 +1,19 @@
+pub mod models;
+
 use axum::{http::StatusCode, routing::post, Json, Router};
 use chat::ChatApi;
 use log::info;
 use openai_api_rust::chat::ChatBody;
 use openai_api_rust::*;
-use serde::Deserialize;
+use tower_http::cors::CorsLayer;
+
+use models::{ChatInput, BASE_URL};
 
 #[tokio::main]
 async fn main() {
-    let app = Router::new().route("/chat", post(chat));
+    let app = Router::new()
+        .route("/chat", post(chat))
+        .layer(CorsLayer::permissive());
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
@@ -15,19 +21,13 @@ async fn main() {
 
 async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<String>) {
     let auth = Auth::from_env().unwrap();
-    let openai = OpenAI::new(auth, "https://api.openai.com/v1/");
+    let openai = OpenAI::new(auth, BASE_URL);
 
     let country = chat_input.country;
     let city = chat_input.city;
     let query = chat_input.query;
 
-    let messages = vec![Message {
-        role: Role::User,
-        content: format!(
-            "I am a tourist visiting {}, {}. Can you provide information about {} in this country?",
-            city, country, query
-        ),
-    }];
+    let messages = gen_message(&country, &city, &query);
 
     let chat_body = ChatBody {
         model: "gpt-4o".to_string(),
@@ -54,9 +54,12 @@ async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<String>) {
     (StatusCode::OK, Json(content))
 }
 
-#[derive(Debug, Deserialize)]
-struct ChatInput {
-    pub country: String,
-    pub city: String,
-    pub query: String,
+pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
+    vec![Message {
+        role: Role::User,
+        content: format!(
+            "I am a tourist visiting {}, {}. Can you provide information about {} in this country?",
+            city, country, query
+        ),
+    }]
 }
