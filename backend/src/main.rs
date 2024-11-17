@@ -5,6 +5,8 @@ use chat::ChatApi;
 use log::info;
 use openai_api_rust::chat::ChatBody;
 use openai_api_rust::*;
+use regex::Regex;
+use serde_json::Value;
 use tower_http::cors::CorsLayer;
 
 use models::{ChatInput, BASE_URL};
@@ -19,7 +21,7 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<String>) {
+async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<Value>) {
     let auth = Auth::from_env().unwrap();
     let openai = OpenAI::new(auth, BASE_URL);
 
@@ -46,12 +48,14 @@ async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<String>) {
     info!("Chat body: {:?}", chat_body);
 
     let response = openai.chat_completion_create(&chat_body);
+
     let choice = response.unwrap().choices;
     let message = choice[0].message.as_ref().unwrap();
     let content = message.content.clone();
-    info!("Content: {:?}", content);
+    let extracted_json = extract_json(&content).unwrap();
+    info!("Content: {:?}", extracted_json);
 
-    (StatusCode::OK, Json(content))
+    (StatusCode::OK, Json(extracted_json))
 }
 
 pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
@@ -99,4 +103,16 @@ pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
             ),
         },
     ]
+}
+
+pub fn extract_json(input: &str) -> Option<Value> {
+    let re = Regex::new(r#"```json\s*(?P<json>\{.*?\})\s*```"#).unwrap();
+
+    if let Some(captures) = re.captures(input) {
+        if let Some(json_str) = captures.name("json") {
+            let json: Value = serde_json::from_str(json_str.as_str()).ok()?;
+            return Some(json);
+        }
+    }
+    None
 }
