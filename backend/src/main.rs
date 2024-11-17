@@ -1,13 +1,38 @@
+use axum::{http::StatusCode, routing::post, Json, Router};
+use chat::ChatApi;
 use log::info;
-use openai_api_rust::chat::*;
+use openai_api_rust::chat::ChatBody;
 use openai_api_rust::*;
+use serde::Deserialize;
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    let app = Router::new().route("/chat", post(chat));
+
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
+}
+
+async fn chat(Json(chat_input): Json<ChatInput>) -> (StatusCode, Json<String>) {
     let auth = Auth::from_env().unwrap();
     let openai = OpenAI::new(auth, "https://api.openai.com/v1/");
-    let body = ChatBody {
+
+    let country = chat_input.country;
+    let city = chat_input.city;
+    let query = chat_input.query;
+
+    let messages = vec![Message {
+        role: Role::User,
+        content: format!(
+            "I am a tourist visiting {}, {}. Can you provide information about {} in this country?",
+            city, country, query
+        ),
+    }];
+
+    let chat_body = ChatBody {
         model: "gpt-4o".to_string(),
-        max_tokens: Some(7),
+        messages,
+        max_tokens: Some(200),
         temperature: Some(0_f32),
         top_p: Some(0_f32),
         n: Some(2),
@@ -17,17 +42,21 @@ fn main() {
         frequency_penalty: None,
         logit_bias: None,
         user: None,
-        // TODO: pass role and content as parameters
-        messages: vec![Message {
-            role: Role::User,
-            content: "Hello!".to_string(),
-        }],
     };
-    let response = openai.chat_completion_create(&body);
-    info!("response: {:?}", response);
-    let choice = response.unwrap().choices;
-    info!("{:?}", choice);
+    info!("Chat body: {:?}", chat_body);
 
-    let message = &choice[0].message.as_ref().unwrap();
-    println!("{:?}", message);
+    let response = openai.chat_completion_create(&chat_body);
+    let choice = response.unwrap().choices;
+    let message = choice[0].message.as_ref().unwrap();
+    let content = message.content.clone();
+    info!("Content: {:?}", content);
+
+    (StatusCode::OK, Json(content))
+}
+
+#[derive(Debug, Deserialize)]
+struct ChatInput {
+    pub country: String,
+    pub city: String,
+    pub query: String,
 }
