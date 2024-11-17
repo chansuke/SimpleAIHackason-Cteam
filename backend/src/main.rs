@@ -1,4 +1,5 @@
 pub mod models;
+pub mod scraper;
 
 use axum::{http::StatusCode, routing::post, Json, Router};
 use chat::ChatApi;
@@ -10,6 +11,7 @@ use serde_json::Value;
 use tower_http::cors::CorsLayer;
 
 use models::{ChatInput, BASE_URL};
+use scraper::scraper;
 
 #[tokio::main]
 async fn main() {
@@ -71,6 +73,9 @@ pub fn gen_message(country: &str, city: &str, query: &str) -> Vec<Message> {
 ",
         city, query, country
     );
+    let contents = scraper(query);
+    println!("contents: {:?}", contents);
+
     let example_output = r#"
 以下のようなJSON形式で出力してください:
 [
