@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import Select from "react-select"; // Auto-complete用ライブラリ
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/router';
@@ -68,6 +69,8 @@ export default function Home() {
   return (
     <div className="main font-[family-name:var(--font-geist-sans)]">
       <main className="main-content">
+        <h1>旅行に行きたい場所を入力して下さい</h1>
+        <Card className="form-card">
         <form onSubmit={submitInput}>
           <div className="submit-box flex flex-col gap-4">
             {/* 国のAuto-Complete */}
@@ -105,13 +108,7 @@ export default function Home() {
             <Button type="submit">Submit</Button>
           </div>
         </form>
-        <ResultCard cardObject={{
-          "time": "10:00",
-          "place": "千歳空港",
-          "activity_name": "飛行機から到着",
-          "description": "千歳空港に飛行機で到着する",
-          "type": "place"
-        }} />
+        </Card>
       </main>
       <style>{`
         .submit-box {
@@ -126,6 +123,10 @@ export default function Home() {
         }
         .main-content {
           width: 80%;
+        }
+
+        .form-card {
+          padding: 0.5rem;
         }
       `}</style>
     </div>

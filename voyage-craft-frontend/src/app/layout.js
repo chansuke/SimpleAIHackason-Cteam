@@ -1,5 +1,8 @@
 import localFont from "next/font/local";
 import "./globals.css";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Card } from "@/components/ui/card";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -23,8 +26,30 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Card className="header-card">
+          <header className="header">
+            <div>
+              <h1>voyage-craft</h1>
+            </div>
+            <div>
+              <Link href={"/"}><Button>home</Button></Link>
+            </div>
+          </header>
+        </Card>
         {children}
       </body>
+      <style>{`
+      .header-card {
+        padding: 0.5rem;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-direction: row;
+      }
+      `}</style>
     </html>
   );
 }
